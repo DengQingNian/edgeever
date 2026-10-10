@@ -20,6 +20,7 @@ import {
   type DesktopAcpAdapterId,
 } from "@/lib/desktop-acp";
 import { cn } from "@/lib/utils";
+import { AgentLogo } from "@/components/ai-sidebar/AgentLogo";
 import {
   SETTINGS_CARD_DESCRIPTION_CLASSNAME,
   SETTINGS_CARD_HEADER_CLASSNAME,
@@ -153,7 +154,9 @@ const DesktopAcpAgentCardBody = ({ bridge }: { bridge: boolean }) => {
     shown?.state === "not_installed" ||
     shown?.state === "needs_login" ||
     (shown?.state === "available" && authMethods.length > 0) ||
-    shown?.updateError
+    shown?.updateError ||
+    adapterId === "openClaw" ||
+    (adapterId === "hermesAgent" && shown?.state === "failed")
   );
 
   const selectAdapter = (id: DesktopAcpAdapterId) => {
@@ -232,7 +235,7 @@ const DesktopAcpAgentCardBody = ({ bridge }: { bridge: boolean }) => {
             const disabled = option === "local" && !bridge;
             const checked = source === option;
             return (
-              <div key={option} className={cn(disabled && "opacity-60", checked && "bg-slate-50/80")}>
+              <div key={option} className={cn(disabled && "opacity-75", checked && "bg-slate-50/80")}>
                 <label className={cn("flex items-start gap-3 px-3.5 py-2.5", disabled ? "cursor-not-allowed" : "cursor-pointer")}>
                   <input
                     className="mt-0.5"
@@ -254,7 +257,7 @@ const DesktopAcpAgentCardBody = ({ bridge }: { bridge: boolean }) => {
                   <div role="group" className="flex flex-wrap gap-2 px-3.5 pb-3 pl-9" aria-label={t("aiAssistant.agentSource.adapter")}>
                     {adapterIds.map((id) => (
                       <span key={id} className="flex h-8 items-center gap-2 rounded-md border border-slate-200 px-2.5 text-xs text-slate-500">
-                        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-slate-300" />
+                        <AgentLogo id={id} />
                         {t(`aiAssistant.agentSource.${id}`)}
                       </span>
                     ))}
@@ -274,7 +277,7 @@ const DesktopAcpAgentCardBody = ({ bridge }: { bridge: boolean }) => {
                   <label
                     key={id}
                     className={cn(
-                      "flex h-8 cursor-pointer items-center gap-2 rounded-md border px-2.5 text-xs",
+                      "flex h-8 cursor-pointer items-center gap-2 rounded-md border px-2.5 text-xs has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2",
                       checked ? "border-slate-900 bg-card text-slate-950" : "border-slate-200 text-slate-600"
                     )}
                   >
@@ -286,7 +289,7 @@ const DesktopAcpAgentCardBody = ({ bridge }: { bridge: boolean }) => {
                       checked={checked}
                       onChange={() => selectAdapter(id)}
                     />
-                    <span aria-hidden="true" className={cn("h-1.5 w-1.5 rounded-full", checked ? "bg-slate-950" : "bg-slate-400")} />
+                    <AgentLogo id={id} />
                     {t(`aiAssistant.agentSource.${id}`)}
                   </label>
                 );
@@ -323,7 +326,7 @@ const DesktopAcpAgentCardBody = ({ bridge }: { bridge: boolean }) => {
               </label>
             ) : null}
 
-            <div className="space-y-2.5 pt-1">
+            <div className="space-y-2 rounded-lg bg-muted/40 p-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
                   <span
@@ -377,20 +380,20 @@ const DesktopAcpAgentCardBody = ({ bridge }: { bridge: boolean }) => {
               </div>
 
               {hasDetails ? (
-                <div className="space-y-2">
+                <div className="space-y-1.5 text-[11px] leading-4 text-slate-500">
                   {shown?.state === "not_installed" ? (
-                    <p className={adapterId === "claudeCode" ? "text-[11px] leading-4 text-slate-500" : "text-xs leading-relaxed text-slate-600"}>
+                    <p>
                       {t(adapterId === "claudeCode" ? "aiAssistant.agentSource.claudeCodeMissingHint" : adapterId === "openClaw" ? "aiAssistant.agentSource.openClawMissingHint" : adapterId === "hermesAgent" ? "aiAssistant.agentSource.hermesAgentMissingHint" : adapterId === "grokBuild" ? "aiAssistant.agentSource.grokBuildMissingHint" : adapterId === "deepseekHarness" ? "aiAssistant.agentSource.deepseekHarnessMissingHint" : adapterId === "piAgent" ? shown.detail === "adapter_missing" ? "aiAssistant.agentSource.piAgentAdapterMissingHint" : "aiAssistant.agentSource.piAgentMissingHint" : adapterId === "workbuddyCn" || adapterId === "workbuddyIntl" ? "aiAssistant.agentSource.workbuddyMissingHint" : "aiAssistant.agentSource.installHint")}
                     </p>
                   ) : null}
                   {shown?.state === "needs_login" && adapterId === "piAgent" ? (
-                    <p className="text-xs leading-relaxed text-slate-600">{t("aiAssistant.agentSource.piAgentLoginHint")}</p>
+                    <p>{t("aiAssistant.agentSource.piAgentLoginHint")}</p>
                   ) : null}
                   {(shown?.state === "needs_login" || shown?.state === "available") && isWorkBuddy ? (
-                    <p className="text-[11px] leading-4 text-slate-500">{t(adapterId === "workbuddyCn" ? "aiAssistant.agentSource.workbuddyCnLoginHint" : "aiAssistant.agentSource.workbuddyIntlLoginHint")}</p>
+                    <p>{t(adapterId === "workbuddyCn" ? "aiAssistant.agentSource.workbuddyCnLoginHint" : "aiAssistant.agentSource.workbuddyIntlLoginHint")}</p>
                   ) : null}
                   {shown?.state === "available" && !isWorkBuddy && authMethods.length ? (
-                    <p className="text-xs leading-relaxed text-slate-600">{t("aiAssistant.agentSource.authAvailableHint")}</p>
+                    <p>{t("aiAssistant.agentSource.authAvailableHint")}</p>
                   ) : null}
                   {(shown?.state === "needs_login" || shown?.state === "available") && authMethods.length ? (
                     <div className="flex flex-wrap gap-2 pt-0.5">
@@ -404,16 +407,16 @@ const DesktopAcpAgentCardBody = ({ bridge }: { bridge: boolean }) => {
                   {shown?.state === "needs_login" && !authMethods.length && adapterId !== "piAgent" ? (
                     <p className="text-xs text-amber-700" role="status">{t("aiAssistant.agentSource.loginUnavailable")}</p>
                   ) : null}
+                  {adapterId === "openClaw" ? (
+                    <p>{t("aiAssistant.agentSource.openClawNoteAccessHint")}</p>
+                  ) : null}
+                  {adapterId === "hermesAgent" && (shown?.state === "failed" || shown?.state === "needs_login") ? (
+                    <p>{t("aiAssistant.agentSource.hermesAgentSetupHint")}</p>
+                  ) : null}
                   {shown?.updateError ? (
                     <p className="text-xs text-amber-700" role="status">{t("aiAssistant.agentSource.updateFailed")}</p>
                   ) : null}
                 </div>
-              ) : null}
-              {adapterId === "openClaw" ? (
-                <p className="text-xs leading-relaxed text-amber-700">{t("aiAssistant.agentSource.openClawNoteAccessHint")}</p>
-              ) : null}
-              {adapterId === "hermesAgent" && (shown?.state === "failed" || shown?.state === "needs_login") ? (
-                <p className="text-xs leading-relaxed text-amber-700">{t("aiAssistant.agentSource.hermesAgentSetupHint")}</p>
               ) : null}
             </div>
           </div>
